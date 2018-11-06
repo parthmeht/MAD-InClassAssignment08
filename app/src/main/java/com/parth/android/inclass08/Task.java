@@ -3,18 +3,28 @@ package com.parth.android.inclass08;
 public class Task {
     private String id;
     private String note,priority,time;
-    private boolean status;
+    private boolean check;
+    private String status;
 
-    public Task(String id, String note, String priority, String time, boolean status) {
+    public Task(String id, String note, String priority, String time, boolean check, String status) {
         this.id = id;
         this.note = note;
         this.priority = priority;
         this.time = time;
+        this.check = check;
         this.status = status;
     }
 
     public Task(){
 
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getNote() {
@@ -41,20 +51,20 @@ public class Task {
         this.time = time;
     }
 
-    public boolean isStatus() {
+    public boolean isCheck() {
+        return check;
+    }
+
+    public void setCheck(boolean check) {
+        this.check = check;
+    }
+
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     @Override
@@ -64,7 +74,8 @@ public class Task {
                 ", note='" + note + '\'' +
                 ", priority='" + priority + '\'' +
                 ", time='" + time + '\'' +
-                ", status=" + status +
+                ", check=" + check +
+                ", status='" + status + '\'' +
                 '}';
     }
 }

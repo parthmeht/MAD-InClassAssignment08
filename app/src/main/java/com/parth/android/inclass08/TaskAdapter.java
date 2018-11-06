@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import org.ocpsoft.prettytime.PrettyTime;
@@ -52,7 +51,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
 
             viewHolder.Note.setText(task.getNote());
             viewHolder.Priority.setText(task.getPriority());
-            viewHolder.checkBox.setChecked(task.isStatus());
+            viewHolder.checkBox.setChecked(task.isCheck());
             String date = messageTime(task);
             if (!(date.equals("") || date.equals(null))) {
                 viewHolder.Time.setText(date);
@@ -69,9 +68,11 @@ public class TaskAdapter extends ArrayAdapter<Task> {
                     dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
                     task.setTime(dateFormat.format(convertedDate));
                     if (checkBox.isChecked()){
-                        task.setStatus(true);
+                        task.setCheck(true);
+                        task.setStatus("Completed");
                     }else {
-                        task.setStatus(false);
+                        task.setCheck(false);
+                        task.setStatus("Pending");
                     }
                     taskOperations.onCheckBoxClick(task);
                 }

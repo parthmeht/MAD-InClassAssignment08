@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
         addButton = findViewById(R.id.buttonAdd);
         spinner = findViewById(R.id.spinner);
         listView = findViewById(R.id.listView);
-
+        priority.add("Priority");
         priority.add("High");
         priority.add("Medium");
         priority.add("Low");
@@ -66,23 +66,26 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
                 android.R.layout.simple_spinner_item,
                 priority
         );
-
+        spinner.setSelection(0);
         spinner.setAdapter(adapter);
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (note.getText().toString()==null||note.getText().toString().matches("")){
-                    Toast.makeText(v.getContext(),"Enter a Note",Toast.LENGTH_LONG).show();
-                }else {
+                if (note.getText().toString() == null || note.getText().toString().matches("")) {
+                    Toast.makeText(v.getContext(), "Enter a Note", Toast.LENGTH_LONG).show();
+                } else if (spinner.getSelectedItemPosition() == 0) {
+                    Toast.makeText(v.getContext(), "Select a Priority", Toast.LENGTH_LONG).show();
+                } else {
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
                     Date convertedDate = new Date();
                     dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
                     String id = myRef.push().getKey();
-                    Task task = new Task(id,note.getText().toString(),spinner.getSelectedItem().toString(),dateFormat.format(convertedDate),false);
-                    Log.d(TAG,task.toString());
+                    Task task = new Task(id, note.getText().toString(), spinner.getSelectedItem().toString(), dateFormat.format(convertedDate), false, "Pending");
+                    Log.d(TAG, task.toString());
                     myRef.child(id).setValue(task);
                     note.setText("");
+                    spinner.setSelection(0);
                 }
             }
         });
@@ -98,13 +101,13 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
                 completedList = new ArrayList<>();
                 pendingList = new ArrayList<>();
                 Log.d(TAG, String.valueOf(dataSnapshot.getChildrenCount()));
-                for (DataSnapshot child: dataSnapshot.getChildren()) {
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
                     Task task = child.getValue(Task.class);
-                    if (task.isStatus())
+                    if (task.isCheck())
                         completedList.add(task);
                     else
                         pendingList.add(task);
-                    Log.d(TAG,task.toString());
+                    Log.d(TAG, task.toString());
                 }
                 Comparator<Task> comparator = new Comparator<Task>() {
                     public int compare(Task o1, Task o2) {
@@ -122,8 +125,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
                         return o1.getNote().compareTo(o2.getNote());
                     }
                 };
-                Collections.sort(pendingList,comparator);
-                Collections.sort(completedList,comparator);
+                Collections.sort(pendingList, comparator);
+                Collections.sort(completedList, comparator);
                 taskArrayList.addAll(pendingList);
                 taskArrayList.addAll(completedList);
                 setListView(taskArrayList);
@@ -138,24 +141,24 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
     }
 
     public void setListView(ArrayList<Task> arrayList) {
-        adapter = new TaskAdapter(this,R.layout.add_task_layout,arrayList,this);
+        adapter = new TaskAdapter(this, R.layout.add_task_layout, arrayList, this);
         listView.setAdapter(adapter);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu,menu);
+        getMenuInflater().inflate(R.menu.menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id==R.id.show_all){
+        if (id == R.id.show_all) {
             setListView(taskArrayList);
-        }else if (id==R.id.show_completed){
+        } else if (id == R.id.show_completed) {
             setListView(completedList);
-        }else if (id==R.id.show_pending){
+        } else if (id == R.id.show_pending) {
             setListView(pendingList);
         }
         return super.onOptionsItemSelected(item);
@@ -164,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
     /*private ArrayList<Task> getFilteredListCompleted(){
         ArrayList<Task> t1 = new ArrayList<>();
         for (Task t: taskArrayList) {
-            if (t.isStatus())
+            if (t.isCheck())
                 t1.add(t);
         }
         return t1;
@@ -173,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
     private ArrayList<Task> getFilteredListPending(){
         ArrayList<Task> t1 = new ArrayList<>();
         for (Task t: taskArrayList) {
-            if (!t.isStatus())
+            if (!t.isCheck())
                 t1.add(t);
         }
         return t1;
@@ -181,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
 
     @Override
     public void onCheckBoxClick(Task param) {
-        Toast.makeText(getApplicationContext(),"Your list have been updated",Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Your list have been updated", Toast.LENGTH_LONG).show();
         myRef.child(param.getId()).setValue(param);
     }
 
@@ -195,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
         alertDialog.setMessage("Are you sure you want delete this?");
 
         alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog,int which) {
+            public void onClick(DialogInterface dialog, int which) {
                 myRef.child(task.getId()).setValue(null);
             }
         });
