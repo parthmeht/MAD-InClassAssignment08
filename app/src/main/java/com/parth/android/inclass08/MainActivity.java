@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 this,
-                android.R.layout.simple_spinner_item,
+                android.R.layout.simple_list_item_1,
                 priority
         );
         spinner.setSelection(0);
