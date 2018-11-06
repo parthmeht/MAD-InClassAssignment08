@@ -23,7 +23,10 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskOperations {
@@ -39,33 +42,31 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
     private ArrayList<Task> pendingList;
     private ListView listView;
     private TaskAdapter adapter;
+    final List<String> priority = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Write a message to the database
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("todolist");
-
-        String[] priority = {"High", "Medium", "Low"};
 
         note = findViewById(R.id.editText);
         addButton = findViewById(R.id.buttonAdd);
         spinner = findViewById(R.id.spinner);
         listView = findViewById(R.id.listView);
 
-        // (3) create an adapter from the list
+        priority.add("High");
+        priority.add("Medium");
+        priority.add("Low");
+
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 this,
                 android.R.layout.simple_spinner_item,
                 priority
         );
 
-        //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        // (4) set the adapter on the spinner
         spinner.setAdapter(adapter);
 
         addButton.setOnClickListener(new View.OnClickListener() {
@@ -105,6 +106,24 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
                         pendingList.add(task);
                     Log.d(TAG,task.toString());
                 }
+                Comparator<Task> comparator = new Comparator<Task>() {
+                    public int compare(Task o1, Task o2) {
+                        int p1 = priority.indexOf(o1.getPriority());
+                        int p2 = priority.indexOf(o2.getPriority());
+                        if (p1 == -1 && p2 != -1) {
+                            return 1;
+                        }
+                        if (p1 != -1 && p2 == -1) {
+                            return -1;
+                        }
+                        if (p1 != p2) {
+                            return p1 - p2;
+                        }
+                        return o1.getNote().compareTo(o2.getNote());
+                    }
+                };
+                Collections.sort(pendingList,comparator);
+                Collections.sort(completedList,comparator);
                 taskArrayList.addAll(pendingList);
                 taskArrayList.addAll(completedList);
                 setListView(taskArrayList);
@@ -189,4 +208,5 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
 
         alertDialog.show();
     }
+
 }
