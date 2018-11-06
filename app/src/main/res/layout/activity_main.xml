@@ -27,6 +27,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
+        android:padding="5dp"
         app:layout_constraintBottom_toBottomOf="@+id/buttonAdd"
         app:layout_constraintEnd_toStartOf="@+id/buttonAdd"
         app:layout_constraintStart_toStartOf="@+id/editText"
@@ -49,9 +50,9 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:descendantFocusability="blocksDescendants"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonAdd" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonAdd"
+        android:background="@drawable/listview_border"/>
 </android.support.constraint.ConstraintLayout>

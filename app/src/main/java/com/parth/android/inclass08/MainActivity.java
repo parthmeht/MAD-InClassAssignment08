@@ -1,18 +1,18 @@
 package com.parth.android.inclass08;
 
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -23,9 +23,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskOperations {
@@ -37,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
     private Button addButton;
     private EditText note;
     private ArrayList<Task> taskArrayList;
+    private ArrayList<Task> completedList;
+    private ArrayList<Task> pendingList;
     private ListView listView;
     private TaskAdapter adapter;
 
@@ -75,23 +75,14 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
                     Toast.makeText(v.getContext(),"Enter a Note",Toast.LENGTH_LONG).show();
                 }else {
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
-                    dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
                     Date convertedDate = new Date();
+                    dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
                     String id = myRef.push().getKey();
                     Task task = new Task(id,note.getText().toString(),spinner.getSelectedItem().toString(),dateFormat.format(convertedDate),false);
                     Log.d(TAG,task.toString());
                     myRef.child(id).setValue(task);
                     note.setText("");
                 }
-            }
-        });
-
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Task task = taskArrayList.get(position);
-                myRef.child(task.getId()).setValue(null);
-                return true;
             }
         });
 
@@ -103,16 +94,20 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 taskArrayList = new ArrayList<>();
+                completedList = new ArrayList<>();
+                pendingList = new ArrayList<>();
                 Log.d(TAG, String.valueOf(dataSnapshot.getChildrenCount()));
                 for (DataSnapshot child: dataSnapshot.getChildren()) {
                     Task task = child.getValue(Task.class);
-                    taskArrayList.add(task);
+                    if (task.isStatus())
+                        completedList.add(task);
+                    else
+                        pendingList.add(task);
                     Log.d(TAG,task.toString());
                 }
-                Collections.reverse(taskArrayList);
+                taskArrayList.addAll(pendingList);
+                taskArrayList.addAll(completedList);
                 setListView(taskArrayList);
-
-
             }
 
             @Override
@@ -124,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
     }
 
     public void setListView(ArrayList<Task> arrayList) {
-        adapter = new TaskAdapter(arrayList,this,this);
+        adapter = new TaskAdapter(this,R.layout.add_task_layout,arrayList,this);
         listView.setAdapter(adapter);
     }
 
@@ -140,14 +135,14 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
         if (id==R.id.show_all){
             setListView(taskArrayList);
         }else if (id==R.id.show_completed){
-            setListView(getFilteredListCompleted());
+            setListView(completedList);
         }else if (id==R.id.show_pending){
-            setListView(getFilteredListPending());
+            setListView(pendingList);
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private ArrayList<Task> getFilteredListCompleted(){
+    /*private ArrayList<Task> getFilteredListCompleted(){
         ArrayList<Task> t1 = new ArrayList<>();
         for (Task t: taskArrayList) {
             if (t.isStatus())
@@ -163,10 +158,35 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.TaskO
                 t1.add(t);
         }
         return t1;
-    }
+    }*/
 
     @Override
     public void onCheckBoxClick(Task param) {
+        Toast.makeText(getApplicationContext(),"Your list have been updated",Toast.LENGTH_LONG).show();
         myRef.child(param.getId()).setValue(param);
+    }
+
+    @Override
+    public void deleteTask(final Task task) {
+
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+
+        alertDialog.setTitle("Confirm Delete");
+
+        alertDialog.setMessage("Are you sure you want delete this?");
+
+        alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog,int which) {
+                myRef.child(task.getId()).setValue(null);
+            }
+        });
+
+        alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        alertDialog.show();
     }
 }
