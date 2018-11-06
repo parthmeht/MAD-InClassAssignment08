@@ -1,14 +1,20 @@
 package com.parth.android.inclass08;
 
 public class Task {
+    String id;
     private String note,priority,time;
-    private boolean checkbox;
+    private boolean status;
 
-    public Task(String note, String priority, String time, boolean checkbox) {
+    public Task(String id, String note, String priority, String time, boolean status) {
+        this.id = id;
         this.note = note;
         this.priority = priority;
         this.time = time;
-        this.checkbox = checkbox;
+        this.status = status;
+    }
+
+    public Task(){
+
     }
 
     public String getNote() {
@@ -35,21 +41,30 @@ public class Task {
         this.time = time;
     }
 
-    public boolean isCheckbox() {
-        return checkbox;
+    public boolean isStatus() {
+        return status;
     }
 
-    public void setCheckbox(boolean checkbox) {
-        this.checkbox = checkbox;
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override
     public String toString() {
         return "Task{" +
-                "note='" + note + '\'' +
+                "id='" + id + '\'' +
+                ", note='" + note + '\'' +
                 ", priority='" + priority + '\'' +
                 ", time='" + time + '\'' +
-                ", checkbox=" + checkbox +
+                ", status=" + status +
                 '}';
     }
 }
